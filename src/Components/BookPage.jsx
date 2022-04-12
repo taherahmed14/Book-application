@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom"
+import { Link, useParams } from "react-router-dom"
 import { useEffect, useState } from "react";
 import { BookCard } from "./BookCard";
 
@@ -18,17 +18,16 @@ export const BookPage = () => {
             setBooks(bookData.results);
         }
         catch(err) {
-            console.log("Fetch error: ", err);
-            // setBooks([]);
+            setBooks([]);
         }
     }
 
     return(
-        <div>
-            <div>
-                <h1>{genre}</h1>
+        <div className="mt-28 justify-center">
+            <div className="w-9/12 m-auto">
+                <h2 className="text-[#5E56E7] text-4xl text-left capitalize">{genre}</h2>
             </div>  
-            <div>
+            <div className="w-9/12 m-auto grid lg:gap-x-6 md:gap-x-4 sm:gap-x-1 gap-y-10 lg:grid-cols-6 md:grid-cols-4 sm:grid-cols-3 mt-16">
                 {books.map((el => (
                     <BookCard key={el.id} book={el} />
                 )))}
