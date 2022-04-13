@@ -20,6 +20,7 @@ function useDebounce(value, delay) {
 
 export const BookPage = () => {
     let { genre } = useParams();
+    const [pageNumber, setPageNumber] = useState(1);
 
     const { loading, books, error } = useSelector((state) => ({
         loading: state.loading,
@@ -36,7 +37,7 @@ export const BookPage = () => {
         //console.log(debounce);
         if(searchInput.length > 0) {
             if(debounce) {
-                getSearchedBook();
+                getBookData();
             }
         }
         else if(searchInput.length === 0) {
@@ -44,26 +45,14 @@ export const BookPage = () => {
         }
     }, [debounce, searchInput]);
 
-    async function getSearchedBook() {
-        try {
-            dispatch(allDataLoading());
-            let res = await fetch(`https://gutendex.com/books/?topic=${genre}&&search=${searchInput.toLowerCase()}`);
-            let bookData = await res.json();
-            dispatch(allDataSuccess(bookData.results));
-        }
-        catch(err) {
-            dispatch(allDataError());
-        }
-    }
-
     useEffect(() => {
         getBookData();
-    }, []);
+    }, [pageNumber]);
 
     async function getBookData() {
         try {
             dispatch(allDataLoading());
-            let res = await fetch(`https://gutendex.com/books/?topic=${genre}`);
+            let res = await fetch(`https://gutendex.com/books/?topic=${genre}&&page=${pageNumber}&&search=${searchInput.toLowerCase()}`);
             let bookData = await res.json();
             console.log(bookData.results);
             dispatch(allDataSuccess(bookData.results));
@@ -72,6 +61,22 @@ export const BookPage = () => {
             dispatch(allDataError());
         }
     }
+
+    const handlePrev = () => {
+        if(pageNumber > 1) {
+            setPageNumber((prev) => {
+                return prev-1;
+            });
+        }
+    }
+
+    const handleNext = () => {
+        setPageNumber((prev) => {
+            return prev+1;
+        });
+    }
+
+    console.log(pageNumber);
 
     return(
         <div className="mt-28 justify-center">
@@ -86,13 +91,18 @@ export const BookPage = () => {
                  type="text" placeholder="Search" onChange={e => setSearchInput(e.target.value)} />
             </div>
             {loading ? <div className="text-[#5E56E7]">Loading...</div> :
-                <div className="w-9/12 m-auto grid lg:gap-x-6 md:gap-x-4 sm:gap-x-1 gap-y-10 lg:grid-cols-6 md:grid-cols-4 sm:grid-cols-3 mt-16">
-                    {books.map((el => (
-                        <BookCard key={el.id} book={el} />
-                    )))}
+                <div className="mb-10">
+                    <div className="w-9/12 m-auto grid lg:gap-x-6 md:gap-x-4 sm:gap-x-1 gap-y-10 lg:grid-cols-6 md:grid-cols-4 sm:grid-cols-3 mt-16">
+                        {books.map((el => (
+                            <BookCard key={el.id} book={el} />
+                        )))}
+                    </div>
+                    <div>
+                        <button className="px-6 py-2 bg-[#5E56E7] text-white hover:opacity-50" onClick={handlePrev}>Prev</button>
+                        <button className="px-6 py-2 bg-[#5E56E7] text-white hover:opacity-50 ml-1" onClick={handleNext}>Next</button>
+                    </div>
                 </div>
             }
-            
         </div>
     )
 }
