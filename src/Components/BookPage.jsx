@@ -1,6 +1,8 @@
 import { Link, useParams } from "react-router-dom"
 import { useEffect, useState } from "react";
 import { BookCard } from "./BookCard";
+import { useDispatch, useSelector } from "react-redux";
+import { allDataError, allDataLoading, allDataSuccess } from "../Features/actions";
 
 function useDebounce(value, delay) {
     const [debounceValue, setDebounceValue] = useState(value);
@@ -18,7 +20,14 @@ function useDebounce(value, delay) {
 
 export const BookPage = () => {
     let { genre } = useParams();
-    const [books, setBooks] = useState([]);
+
+    const { loading, books, error } = useSelector((state) => ({
+        loading: state.loading,
+        books: state.books,
+        error: state.error
+    }));
+
+    const dispatch = useDispatch();
 
     const [searchInput, setSearchInput] = useState("");
     const debounce = useDebounce(searchInput, 500);
@@ -37,12 +46,13 @@ export const BookPage = () => {
 
     async function getSearchedBook() {
         try {
+            dispatch(allDataLoading());
             let res = await fetch(`https://gutendex.com/books/?topic=${genre}&&search=${searchInput.toLowerCase()}`);
             let bookData = await res.json();
-            setBooks(bookData.results);
+            dispatch(allDataSuccess(bookData.results));
         }
         catch(err) {
-            setBooks([]);
+            dispatch(allDataError());
         }
     }
 
@@ -52,13 +62,14 @@ export const BookPage = () => {
 
     async function getBookData() {
         try {
+            dispatch(allDataLoading());
             let res = await fetch(`https://gutendex.com/books/?topic=${genre}`);
             let bookData = await res.json();
             console.log(bookData.results);
-            setBooks(bookData.results);
+            dispatch(allDataSuccess(bookData.results));
         }
         catch(err) {
-            setBooks([]);
+            dispatch(allDataError());
         }
     }
 
@@ -73,12 +84,15 @@ export const BookPage = () => {
                 </div>
                 <input className="border-2 text-left justify-left w-full mt-6 px-6 py-1 focus:outline-none"
                  type="text" placeholder="Search" onChange={e => setSearchInput(e.target.value)} />
-            </div>  
-            <div className="w-9/12 m-auto grid lg:gap-x-6 md:gap-x-4 sm:gap-x-1 gap-y-10 lg:grid-cols-6 md:grid-cols-4 sm:grid-cols-3 mt-16">
-                {books.map((el => (
-                    <BookCard key={el.id} book={el} />
-                )))}
             </div>
+            {loading ? <div className="text-[#5E56E7]">Loading...</div> :
+                <div className="w-9/12 m-auto grid lg:gap-x-6 md:gap-x-4 sm:gap-x-1 gap-y-10 lg:grid-cols-6 md:grid-cols-4 sm:grid-cols-3 mt-16">
+                    {books.map((el => (
+                        <BookCard key={el.id} book={el} />
+                    )))}
+                </div>
+            }
+            
         </div>
     )
 }
