@@ -15,6 +15,12 @@
 - Tailwind
 - React-router-dom
 
+# Features -
+
+- Debounce
+- Pagination
+- Navigate to external page
+
 ### Home Page
 
 ![](https://github.com/taherahmed14/Book-application/blob/main/Screenshots/Home.png)
